@@ -17,10 +17,10 @@ from math import cos, sin
 from PIL import Image
 import encoding
 
-##Initialise the constants
+# Initialise the constants
 DATASET_ROOT = '../datasets/Fashion144k_stylenet_v1/'
 FEATURES_ALL = '../features/'
-MODEL_FILE = '../models/saved_model_stylenet_ST_LSTM.pt'
+MODEL_FILE = '../model/model_fashion_144k.pt'
 BATCH_SIZE = 64
 LABEL_SIZE = 59
 LEARNING_RATE = 0.00001
@@ -83,14 +83,14 @@ class STLSTMCell(nn.Module):
         return M_0,h_0,c_0
 
 class Net(nn.Module):
-    
+
     def __init__(self):
         super(Net, self).__init__()
         self.layer = encoding.nn.Encoding(D=256,K=32)
         self.cnn = CNN()
         self.rnn = STLSTMCell(256*32, 256 , LABEL_SIZE)
         print ("init")
-        
+
     # Spatial transformer network forward function
     def stn(self, f_I, M_curr):
         f_I = f_I.view(-1, 256, 24, 16)
@@ -104,12 +104,12 @@ class Net(nn.Module):
         M = M.view(-1,2,3)
         scale_loss = np.fmax(M.data.cpu().numpy()[:,0,0]-0.5,0)**2 + np.fmax(M.data.cpu().numpy()[:,1,1]-0.5,0)**2
         return scale_loss
-        
+
     def pos_constraint(self,M):
         M = M.view(-1,2,3)
         pos_c = np.fmax(0.1-M.data.cpu().numpy()[:,0,0],0) + np.fmax(0.1-M.data.cpu().numpy()[:,1,1],0)
         return pos_c
-        
+
     def anchor_constraint(self, M_list):
         anch_c = 0
         anchor_points = []
@@ -117,7 +117,7 @@ class Net(nn.Module):
         y0 = 0
         lst = []
         for i in range(10):
-            x = x0 + 0.5 * cos(2 * 22/7.0 * i / 10) 
+            x = x0 + 0.5 * cos(2 * 22/7.0 * i / 10)
             y = y0 + 0.5 * sin(2 * 22/7.0 * i / 10)
             anchor_points.append([x,y])
         anch_loc = 0
@@ -125,11 +125,11 @@ class Net(nn.Module):
             M = M.view(-1,2,3)
             anch_c += 0.5 * ((M.data.cpu().numpy()[:,0,2]-anchor_points[anch_loc][0])**2 + (M.data.cpu().numpy()[:,1,2]-anchor_points[anch_loc][1])**2)
         return anch_c
-        
+
     def forward(self,x):
         # transform the input
         f_I = self.cnn(x)
-    
+
         M_curr, h_curr, c_curr = self.rnn.init_hidden(BATCH_SIZE)
         f_curr = self.stn(f_I, M_curr)
         f_curr = f_curr.view(BATCH_SIZE,256,384)
@@ -161,24 +161,24 @@ class Net(nn.Module):
 
 
 def get_features():
-    
-    ##Load the model
+
+    # Load the model
     model = Net()
     model.load_state_dict(torch.load(MODEL_FILE))
     model.cuda()
     mean = [0.5657177752729754, 0.5381838567195789, 0.4972228365504561]
     std = [0.29023818639817184, 0.2874722565279285, 0.2933830104791508]
-    
-    ##Store all the features
+
+    # Store all the features
     features_all = []
     file = open(DATASET_ROOT + 'female_online_offline_images.txt','rb')
     lines = file.readlines()
-    
+
     inputs = []
-    
+
     i = 1
-    
-    ##Loop over all the files 
+
+    # Loop over all the files
     for line in lines:
         img = Image.open(DATASET_ROOT + line.split('\n')[0]).convert('RGB')
         img = img.resize((256, 384))
@@ -189,12 +189,12 @@ def get_features():
         img = np.divide(img, std)
         img = np.transpose(img, (2,0,1))
         inputs.append(img)
-        
+
         if i%64 == 0:
             inputs_ = np.asarray(inputs, dtype=np.float32)
             scores, features = model(Variable(torch.from_numpy(inputs_).cuda()))
             features = features.cpu().data.numpy()
-            
+
             for j in range(64):
                 features_all.append(features[-1][j])
             inputs = []

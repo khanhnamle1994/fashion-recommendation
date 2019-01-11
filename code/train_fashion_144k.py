@@ -15,9 +15,8 @@ from math import cos, sin
 from PIL import Image
 import encoding
 
-##Initialise the constants
+# Initialise the constants
 DATASET_ROOT = '../datasets/Fashion144k_stylenet_v1/'
-MODEL_FILE = '../models/saved_model_final.pt'
 BATCH_SIZE = 32
 LABEL_SIZE = 59
 
@@ -159,7 +158,7 @@ class Net(nn.Module):
 
 def train():
     torch.backends.cudnn.enabled = False
-    ##Initialise the model
+    # Initialise the model
     model = Net()
     model.cuda()
     optimizer = optim.Adam(model.parameters(), lr=0.00001)
@@ -172,14 +171,14 @@ def train():
 
     TRAIN_SIZE = trainids.shape[0]
 
-    #Map ID to filenames
+    # Map ID to filenames
     id_to_name = []
 
     r = csv.reader(open(DATASET_ROOT + 'photos.txt'))
     for row in r:
         id_to_name.append(DATASET_ROOT + row[0])
 
-    ##Load the labels
+    # Load the labels
     labels_all = np.load(DATASET_ROOT + 'feat/singles_at_59.npy')
 
     trainids = np.load(DATASET_ROOT + 'trainids.npy')
@@ -225,7 +224,7 @@ def train():
 
                 features_t = features.permute(0,2,1)
 
-                ##Calculate divergence loss
+                # Calculate divergence loss
                 corr = torch.bmm(features,features_t)
                 div_loss = corr.sum()/(384*32*100000)
                 norm = []
@@ -233,7 +232,7 @@ def train():
                     norm.append(j.norm(1).repeat(LABEL_SIZE))
                 norm = torch.stack(norm)
 
-                ##Calculate the probabilities for each label
+                # Calculate the probabilities for each label
                 p_bar = torch.FloatTensor(BATCH_SIZE,LABEL_SIZE)
                 p_bar = labels/norm
 
@@ -242,18 +241,18 @@ def train():
                         if(math.isnan(p_bar.data[j][k])):
                             p_bar.data[i][j] = 0.0
 
-                ##Classification loss
+                # Classification loss
                 classification_loss = ((outputs - p_bar).pow(2).sum())/BATCH_SIZE
 
-                ##Localisation loss
+                # Localisation loss
                 localisation_loss = np.sum(scale_c)/BATCH_SIZE + 0.1*np.sum(pos_c) /BATCH_SIZE + 0.01 * np.sum(anch_c) /BATCH_SIZE
 
-                ##Combine all losses
+                # Combine all losses
                 loss = classification_loss + 0.1*localisation_loss + div_loss
                 loss.backward()
                 optimizer.step()
 
-                ##Sort the labels
+                # Sort the labels
                 sorted1 = Variable(torch.IntTensor(BATCH_SIZE, LABEL_SIZE).zero_())
                 sorted1 = outputs.sort(1,True)
                 predict = Variable(torch.IntTensor(BATCH_SIZE, LABEL_SIZE).zero_())
@@ -280,7 +279,7 @@ def train():
                 average_precision["micro"] = average_precision_score(true, predicts, average="micro")
                 print('[%d, %5d] loss: %.13f Average precision score: %13f' % (epoch + 1, i + 1, running_loss, average_precision["micro"]))
         np.random.shuffle(trainids)
-        torch.save(model.state_dict(), "/media/Drive2/Staq/fashion_recommendation/models/model_fashion_144k.pt")
+        torch.save(model.state_dict(), "../model/model_fashion_144k.pt")
         print("Epoch complete")
     print('Finished Training')
 train()
