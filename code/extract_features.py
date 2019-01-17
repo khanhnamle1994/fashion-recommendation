@@ -1,5 +1,3 @@
-##This file extracts the features of all the images from the network which can be compared
-##to extract similar images.
 from __future__ import print_function
 import torch
 import torch.nn as nn
