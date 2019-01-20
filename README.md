@@ -12,7 +12,6 @@ More specifically, I used the images in the [DeepFashion Attribute Prediction](h
 ![AttributePrediction](deep-fashion-attribute-prediction.jpg)
 
 ## Code
-
 1. [preprocessing.py](https://github.com/khanhnamle1994/fashion-recommendation/blob/master/code/preprocessing.py): This code is used to pre-process the dataset.
 2. [hyper_parameters.py](https://github.com/khanhnamle1994/fashion-recommendation/blob/master/code/hyper_parameters.py): This code is used to define all hyper-parameters regarding training.
 3. [fashion_input.py](https://github.com/khanhnamle1994/fashion-recommendation/blob/master/code/fashion_input.py): This code is used to pre-process the image further during training.
@@ -20,7 +19,6 @@ More specifically, I used the images in the [DeepFashion Attribute Prediction](h
 5. [train_n_test.py](https://github.com/khanhnamle1994/fashion-recommendation/blob/master/code/train_n_test.py): This code is used as the main training file.
 
 ## Requirements
-- [TensorFlow](https://pytorch.org/) latest version
-- [sklearn](https://scikit-learn.org/) latest version
+- [TensorFlow](https://www.tensorflow.org/) latest version
+- [pandas](https://pandas.pydata.org/) latest version
 - [numpy](http://www.numpy.org/) latest version
-- PyTorch's [Encoding](https://hangzhang.org/PyTorch-Encoding/nn.html)
