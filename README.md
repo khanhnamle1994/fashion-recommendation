@@ -18,6 +18,20 @@ More specifically, I used the images in the [DeepFashion Attribute Prediction](h
 4. [simple_resnet.py](https://github.com/khanhnamle1994/fashion-recommendation/blob/master/code/simple_resnet.py): This code is used to define ResNet architecture.
 5. [train_n_test.py](https://github.com/khanhnamle1994/fashion-recommendation/blob/master/code/train_n_test.py): This code is used as the main training file.
 
+## Sample Results
+
+1 - Romper Category
+
+![Romper](Results/Romper-Examples.png)
+
+2 - Jacket Category
+
+![Jacket](Results/Jacket-Examples.png)
+
+3 - Blouse Shirt Category
+
+![BlouseShirt](Results/BlouseShirt-Examples.png)
+
 ## Requirements
 - [TensorFlow](https://www.tensorflow.org/) latest version
 - [pandas](https://pandas.pydata.org/) latest version
