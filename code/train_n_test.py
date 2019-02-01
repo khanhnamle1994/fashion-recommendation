@@ -43,7 +43,6 @@ class Train:
         self.placeholders()
 
     def loss(self, logits, bbox, labels, bbox_labels):
-
         labels = tf.cast(labels, tf.int64)
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels, name='cross_entropy_per_example')
         mse_loss = tf.reduce_mean(tf.losses.mean_squared_error(bbox_labels, bbox), name='mean_square_loss')
@@ -51,11 +50,9 @@ class Train:
         return cross_entropy_mean + mse_loss
 
     def top_k_error(self, predictions, labels, k):
-
         batch_size = predictions.get_shape().as_list()[0]
         in_top1 = tf.to_float(tf.nn.in_top_k(predictions, labels, k=1))
         num_correct = tf.reduce_sum(in_top1)
-
         return (batch_size - num_correct) / float(batch_size)
 
 
@@ -75,7 +72,6 @@ class Train:
 
 
     def train_operation(self, global_step, total_loss, top1_error):
-
         tf.summary.scalar('learning_rate', self.lr_placeholder)
         tf.summary.scalar('train_loss', total_loss)
         tf.summary.scalar('train_top1_error', top1_error)
@@ -93,8 +89,7 @@ class Train:
     def validation_op(self, validation_step, top1_error, loss):
         ema = tf.train.ExponentialMovingAverage(0.0, validation_step)
         ema2 = tf.train.ExponentialMovingAverage(0.95, validation_step)
-        val_op = tf.group(validation_step.assign_add(1), ema.apply([top1_error, loss]),
-                          ema2.apply([top1_error, loss]))
+        val_op = tf.group(validation_step.assign_add(1), ema.apply([top1_error, loss]), ema2.apply([top1_error, loss]))
         top1_error_val = ema.average(top1_error)
         top1_error_avg = ema2.average(top1_error)
         loss_val = ema.average(loss)
@@ -133,12 +128,10 @@ class Train:
 
 
     def train(self):
-        train_df = prepare_df(FLAGS.train_path, usecols=['image_path', 'category', 'x1_modified', 'y1_modified',
-                                                         'x2_modified', 'y2_modified'])
-        vali_df = prepare_df(FLAGS.vali_path, usecols=['image_path', 'category', 'x1_modified', 'y1_modified', 'x2_modified',
-                                                   'y2_modified'])
-        num_train = len(train_df)
+        train_df = prepare_df(FLAGS.train_path, usecols=['image_path', 'category', 'x1_modified', 'y1_modified', 'x2_modified', 'y2_modified'])
+        vali_df = prepare_df(FLAGS.vali_path, usecols=['image_path', 'category', 'x1_modified', 'y1_modified', 'x2_modified', 'y2_modified'])
 
+        num_train = len(train_df)
         global_step = tf.Variable(0, trainable=False)
         validation_step = tf.Variable(0, trainable=False)
 
@@ -150,12 +143,11 @@ class Train:
 
 
         reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
-
         loss = self.loss(logits, bbox, self.label_placeholder, self.bbox_placeholder)
         full_loss = tf.add_n([loss] + reg_losses)
+
         predictions = tf.nn.softmax(logits)
         top1_error = self.top_k_error(predictions, self.label_placeholder, 1)
-
         vali_loss = self.loss(vali_logits, vali_bbox, self.vali_label_placeholder, self.vali_bbox_placeholder)
         vali_predictions = tf.nn.softmax(vali_logits)
         vali_top1_error = self.top_k_error(vali_predictions, self.vali_label_placeholder, 1)

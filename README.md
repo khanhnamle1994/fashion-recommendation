@@ -36,3 +36,6 @@ More specifically, I used the images in the [DeepFashion Attribute Prediction](h
 - [TensorFlow](https://www.tensorflow.org/) latest version
 - [pandas](https://pandas.pydata.org/) latest version
 - [numpy](http://www.numpy.org/) latest version
+
+## Run on FloydHub
+[![Run on FloydHub](https://static.floydhub.com/button/button-small.svg)](https://floydhub.com/run)
