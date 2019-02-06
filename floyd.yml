@@ -1,0 +1,4 @@
+machine: cpu
+env: tensorflow-1.11
+description: train the ResNet model on DeepFashion data
+command: python code/train_n_test.py

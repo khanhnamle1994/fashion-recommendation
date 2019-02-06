@@ -361,4 +361,4 @@ class Train:
 
 train = Train()
 train.train()
-# train.test()
+train.test()
